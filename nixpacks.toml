@@ -1,4 +1,19 @@
-# إعداد Nixpacks لبيئة Railway
-# PHP 8.2 مع الامتدادات التي يحتاجها Laravel + Filament (intl ضروري، zip، gd للصور)
+# إعداد Nixpacks لبيئة Railway (PHP 8.2 + Laravel/Filament)
+# ملاحظة: تعريف nixPkgs يستبدل الحزم الافتراضية، لذا نُعيد إدراج composer صراحةً.
+# المشروع لا يستخدم @vite (Filament يستخدم أصولاً مُجمّعة مسبقاً) → لا حاجة لـ node/npm.
+
 [phases.setup]
-nixPkgs = ["php82", "php82Extensions.intl", "php82Extensions.zip", "php82Extensions.gd"]
+nixPkgs = [
+    "php82",
+    "php82Extensions.intl",
+    "php82Extensions.zip",
+    "php82Extensions.gd",
+    "php82Packages.composer",
+]
+
+[phases.install]
+cmds = ["composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs"]
+
+# لا يوجد بناء واجهة أمامية (لا Vite) — نتجاوز مرحلة البناء لتفادي npm
+[phases.build]
+cmds = ["echo 'No frontend build required (Filament ships precompiled assets).'"]
