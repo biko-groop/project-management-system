@@ -86,6 +86,19 @@ class User extends Authenticatable implements FilamentUser
         return $this->belongsTo(Department::class);
     }
 
+    // التسمية في قوائم الاختيار: الاسم — القسم · الصفة
+    public function getSelectLabelAttribute(): string
+    {
+        $roleLabels = ['admin' => 'مدير النظام', 'manager' => 'مدير', 'user' => 'مستخدم'];
+
+        $meta = array_filter([
+            $this->department?->name,
+            $this->job_title ?: ($roleLabels[$this->role] ?? $this->role),
+        ]);
+
+        return $this->name . (count($meta) ? ' — ' . implode(' · ', $meta) : '');
+    }
+
     // المدير المباشر
     public function manager(): BelongsTo
     {

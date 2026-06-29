@@ -51,7 +51,8 @@ class DepartmentResource extends Resource
                 Forms\Components\Select::make('manager_id')
                     ->label(__('Manager'))
                     ->relationship('manager', 'name')
-                    ->searchable()
+                    ->getOptionLabelFromRecordUsing(fn (\App\Models\User $r) => $r->select_label)
+                    ->searchable(['name', 'job_title'])
                     ->preload(),
             ]);
     }

@@ -38,7 +38,9 @@ class MembersRelationManager extends RelationManager
                     ->preloadRecordSelect()
                     ->recordSelectSearchColumns(['name', 'email'])
                     ->form(fn (Tables\Actions\AttachAction $action): array => [
-                        $action->getRecordSelect()->label('المستخدم'),
+                        $action->getRecordSelect()
+                            ->label('المستخدم')
+                            ->getOptionLabelFromRecordUsing(fn (\App\Models\User $r) => $r->select_label),
                         Forms\Components\Select::make('role')->label('الدور')->options(self::ROLES)->default('member')->required()->native(false),
                     ])
                     ->mutateFormDataUsing(function (array $data): array {

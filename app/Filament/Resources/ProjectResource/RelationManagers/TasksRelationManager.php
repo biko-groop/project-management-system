@@ -31,7 +31,7 @@ class TasksRelationManager extends RelationManager
             Forms\Components\TextInput::make('title')->label('العنوان')->required()->maxLength(255)->columnSpanFull(),
             Forms\Components\Select::make('status')->label('الحالة')->options(self::STATUSES)->default('pending')->native(false)->required(),
             Forms\Components\Select::make('priority')->label('الأولوية')->options(self::PRIORITIES)->default('medium')->native(false)->required(),
-            Forms\Components\Select::make('assigned_to')->label('المسؤول')->relationship('assignedUser', 'name')->searchable()->preload(),
+            Forms\Components\Select::make('assigned_to')->label('المسؤول')->relationship('assignedUser', 'name')->getOptionLabelFromRecordUsing(fn (\App\Models\User $r) => $r->select_label)->searchable(['name', 'job_title'])->preload(),
             Forms\Components\DatePicker::make('due_date')->label('تاريخ النهاية'),
         ])->columns(2);
     }

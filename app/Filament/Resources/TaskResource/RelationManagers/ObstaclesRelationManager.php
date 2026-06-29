@@ -36,7 +36,7 @@ class ObstaclesRelationManager extends RelationManager
             Forms\Components\TextInput::make('type')->label(__('Type'))->maxLength(255),
             Forms\Components\Textarea::make('description')->label(__('Description'))->required()->rows(2)->columnSpanFull(),
             Forms\Components\Select::make('impact')->label(__('Impact'))->options(self::IMPACTS)->default('medium')->native(false)->required(),
-            Forms\Components\Select::make('assigned_to')->label(__('Assigned To'))->relationship('assignee', 'name')->searchable()->preload(),
+            Forms\Components\Select::make('assigned_to')->label(__('Assigned To'))->relationship('assignee', 'name')->getOptionLabelFromRecordUsing(fn (\App\Models\User $r) => $r->select_label)->searchable(['name', 'job_title'])->preload(),
             Forms\Components\Select::make('status')->label(__('Status'))->options(self::STATUSES)->default('open')->native(false)->required(),
         ])->columns(2);
     }

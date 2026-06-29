@@ -110,7 +110,13 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make('الإدارة والإعدادات')->icon('heroicon-o-cog-6-tooth'),
             ])
             // جرس الإشعارات في الشريط العلوي
-            ->renderHook('panels::topbar.end', fn (): string => view('filament.notification-bell')->render());
+            ->renderHook('panels::topbar.end', fn (): string => view('filament.notification-bell')->render())
+            // صفحة الدخول بخلفية بلون هوية النظام (تتغيّر مع المظهر تلقائياً)
+            ->renderHook('panels::body.start', fn (): string => '<style>
+                .fi-simple-layout { background: linear-gradient(135deg, rgb(var(--primary-500)) 0%, rgb(var(--primary-700)) 60%, rgb(var(--primary-900)) 100%) !important; }
+                .fi-simple-main { box-shadow: 0 18px 50px rgba(0,0,0,.25) !important; border-radius: 1rem !important; }
+                .fi-simple-layout .fi-logo { color: #fff !important; }
+            </style>');
 
         // سايد بار داكن بلون الهوية المُختار (يتغيّر مع اللون)
         if ($sidebarDark) {

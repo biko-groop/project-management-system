@@ -13,12 +13,14 @@
             @endforeach
         </div>
         <div style="display:flex;gap:.4rem;">
-            <button onclick="window.print()" style="padding:.4rem .8rem;border-radius:.5rem;border:1px solid rgba(0,0,0,.12);cursor:pointer;">
+            <a href="{{ route('reports.print', ['type' => $type]) }}" target="_blank"
+               style="padding:.45rem .9rem;border-radius:.5rem;border:1px solid rgba(0,0,0,.12);cursor:pointer;text-decoration:none;color:inherit;background:#fff;">
                 🖨️ طباعة / PDF
-            </button>
-            <button wire:click="exportCsv" style="padding:.4rem .8rem;border-radius:.5rem;border:1px solid rgba(0,0,0,.12);cursor:pointer;">
+            </a>
+            <a href="{{ route('reports.export', ['type' => $type]) }}"
+               style="padding:.45rem .9rem;border-radius:.5rem;border:0;cursor:pointer;text-decoration:none;color:#fff;background:#16a34a;">
                 ⬇️ تصدير Excel
-            </button>
+            </a>
         </div>
     </div>
 
@@ -57,12 +59,4 @@
         </table>
     </div>
 
-    <style>
-        @media print {
-            .no-print, .fi-sidebar, .fi-topbar, .fi-header { display:none !important; }
-            .fi-main, .fi-page { margin:0 !important; padding:0 !important; }
-            #print-area { box-shadow:none !important; }
-            body { background:#fff !important; }
-        }
-    </style>
 </x-filament-panels::page>

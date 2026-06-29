@@ -35,6 +35,8 @@ class AdminSmokeTest extends TestCase
             '/admin/reports',
             '/admin/audit-logs',
             '/admin/my-notifications',
+            '/reports/print?type=projects',
+            '/reports/export?type=workload',
         ];
 
         foreach ($urls as $url) {

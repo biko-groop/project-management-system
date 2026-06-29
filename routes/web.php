@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -11,3 +12,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', fn () => redirect('/admin'));
+
+// طباعة وتصدير التقارير (تتطلب جلسة مسجّلة)
+Route::get('/reports/print', [ReportController::class, 'print'])->name('reports.print');
+Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');

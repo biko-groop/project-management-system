@@ -42,7 +42,8 @@ class NotificationResource extends Resource
                 Forms\Components\Select::make('user_id')
                     ->label('المستخدم')
                     ->relationship('user', 'name')
-                    ->searchable()
+                    ->getOptionLabelFromRecordUsing(fn (\App\Models\User $r) => $r->select_label)
+                    ->searchable(['name', 'job_title'])
                     ->preload()
                     ->required(),
                 Forms\Components\TextInput::make('title')

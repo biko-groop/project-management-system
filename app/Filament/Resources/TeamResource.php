@@ -47,8 +47,9 @@ class TeamResource extends Resource
             Forms\Components\Select::make('created_by')
                 ->label(__('Created By'))
                 ->relationship('creator', 'name')
+                ->getOptionLabelFromRecordUsing(fn (\App\Models\User $r) => $r->select_label)
                 ->default(fn () => auth()->id())
-                ->searchable()
+                ->searchable(['name', 'job_title'])
                 ->preload()
                 ->required(),
         ]);

@@ -69,7 +69,8 @@ class TaskResource extends Resource
             Forms\Components\Select::make('assigned_to')
                 ->label(__('Assigned To'))
                 ->relationship('assignedUser', 'name')
-                ->searchable()
+                ->getOptionLabelFromRecordUsing(fn (\App\Models\User $r) => $r->select_label)
+                ->searchable(['name', 'job_title'])
                 ->preload(),
             Forms\Components\Select::make('status')
                 ->label(__('Status'))
@@ -105,8 +106,9 @@ class TaskResource extends Resource
             Forms\Components\Select::make('created_by')
                 ->label(__('Created By'))
                 ->relationship('creator', 'name')
+                ->getOptionLabelFromRecordUsing(fn (\App\Models\User $r) => $r->select_label)
                 ->default(fn () => auth()->id())
-                ->searchable()
+                ->searchable(['name', 'job_title'])
                 ->preload()
                 ->required(),
             Forms\Components\Section::make('الاعتماديات (المهام السابقة)')
