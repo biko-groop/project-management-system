@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Route;
 | (الواجهة القديمة Bootstrap حُذفت بالكامل).
 */
 
-Route::get('/', fn () => redirect('/admin'));
+// إعادة توجيه قابلة للـ route:cache (بدون closure)
+Route::redirect('/', '/admin');
 
 // طباعة وتصدير التقارير (تتطلب جلسة مسجّلة)
 Route::get('/reports/print', [ReportController::class, 'print'])->name('reports.print');

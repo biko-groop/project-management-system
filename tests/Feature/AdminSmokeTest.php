@@ -22,8 +22,10 @@ class AdminSmokeTest extends TestCase
             "/admin/projects/{$firstProjectId}/edit",
             '/admin/tasks',
             '/admin/tasks/create',
+            "/admin/tasks/{$firstTaskId}",
             "/admin/tasks/{$firstTaskId}/edit",
             '/admin/teams',
+            '/admin/teams/create',
             '/admin/users',
             '/admin/users/create',
             '/admin/departments',
@@ -35,6 +37,7 @@ class AdminSmokeTest extends TestCase
             '/admin/reports',
             '/admin/audit-logs',
             '/admin/my-notifications',
+            '/admin/dev-team',
             '/reports/print?type=projects',
             '/reports/export?type=workload',
         ];

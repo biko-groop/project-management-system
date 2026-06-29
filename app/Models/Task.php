@@ -30,6 +30,7 @@ class Task extends Model
         'delay_needs_decision',
         'obstacles',
         'potential_risks',
+        'notes',
     ];
 
     protected $casts = [

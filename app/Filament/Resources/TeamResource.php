@@ -52,6 +52,15 @@ class TeamResource extends Resource
                 ->searchable(['name', 'job_title'])
                 ->preload()
                 ->required(),
+            Forms\Components\Select::make('users')
+                ->label('الأعضاء')
+                ->relationship('users', 'name')
+                ->getOptionLabelFromRecordUsing(fn (\App\Models\User $r) => $r->select_label)
+                ->multiple()
+                ->searchable(['name', 'job_title'])
+                ->preload()
+                ->columnSpanFull()
+                ->helperText('اختر مستخدمين لإضافتهم كأعضاء في الفريق'),
         ]);
     }
 

@@ -8,6 +8,8 @@ use App\Models\Task;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables;
@@ -111,6 +113,10 @@ class TaskResource extends Resource
                 ->searchable(['name', 'job_title'])
                 ->preload()
                 ->required(),
+            Forms\Components\Textarea::make('notes')
+                ->label('ملاحظات')
+                ->rows(3)
+                ->columnSpanFull(),
             Forms\Components\Section::make('الاعتماديات (المهام السابقة)')
                 ->description('المهام التي يجب إنهاؤها قبل بدء هذه المهمة')
                 ->schema([
@@ -185,9 +191,80 @@ class TaskResource extends Resource
         ]);
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist->schema([
+            Infolists\Components\Section::make('بيانات المهمة')
+                ->icon('heroicon-o-clipboard-document-list')
+                ->schema([
+                    Infolists\Components\TextEntry::make('title')->label('العنوان')
+                        ->weight('bold')->size('lg')->columnSpanFull(),
+                    Infolists\Components\TextEntry::make('project.name')->label('المشروع')->badge()->color('primary'),
+                    Infolists\Components\TextEntry::make('department.name')->label('القسم')->badge()->color('gray')->default('—'),
+                    Infolists\Components\TextEntry::make('assignedUser')->label('المسؤول')
+                        ->getStateUsing(fn ($record) => $record->assignedUser?->select_label ?? '—'),
+                    Infolists\Components\TextEntry::make('creator.name')->label('المنشئ')->default('—'),
+                    Infolists\Components\TextEntry::make('status')->label('الحالة')->badge()
+                        ->formatStateUsing(fn ($state) => self::STATUSES[$state] ?? $state)
+                        ->color(fn ($state) => match ($state) { 'completed' => 'success', 'in_progress' => 'info', 'cancelled' => 'danger', default => 'warning' }),
+                    Infolists\Components\TextEntry::make('priority')->label('الأولوية')->badge()
+                        ->formatStateUsing(fn ($state) => self::PRIORITIES[$state] ?? $state)
+                        ->color(fn ($state) => match ($state) { 'urgent' => 'danger', 'high' => 'warning', 'low' => 'gray', default => 'info' }),
+                    Infolists\Components\TextEntry::make('progress')->label('نسبة الإنجاز')
+                        ->formatStateUsing(fn ($state) => ($state ?? 0) . '%')->badge()
+                        ->color(fn ($state) => $state >= 100 ? 'success' : ($state >= 50 ? 'info' : 'gray')),
+                    Infolists\Components\TextEntry::make('description')->label('الوصف')->default('—')->columnSpanFull(),
+                    Infolists\Components\TextEntry::make('notes')->label('ملاحظات')->default('—')->columnSpanFull(),
+                ])->columns(2),
+
+            Infolists\Components\Section::make('التواريخ والوقت')
+                ->icon('heroicon-o-calendar')
+                ->schema([
+                    Infolists\Components\TextEntry::make('start_date')->label('تاريخ البداية')->date()->placeholder('—'),
+                    Infolists\Components\TextEntry::make('due_date')->label('تاريخ الاستحقاق')->date()->placeholder('—')
+                        ->color(fn ($record) => $record->is_delayed ? 'danger' : null),
+                    Infolists\Components\TextEntry::make('estimated_hours')->label('الساعات المتوقعة')->placeholder('—'),
+                    Infolists\Components\TextEntry::make('actual_hours')->label('الساعات الفعلية')->placeholder('—'),
+                    Infolists\Components\IconEntry::make('is_delayed')->label('متأخرة؟')->boolean()
+                        ->trueIcon('heroicon-o-exclamation-triangle')->falseIcon('heroicon-o-check-circle')
+                        ->trueColor('danger')->falseColor('success'),
+                    Infolists\Components\TextEntry::make('days_delayed')->label('أيام التأخير')
+                        ->visible(fn ($record) => $record->is_delayed)->badge()->color('danger'),
+                ])->columns(3),
+
+            Infolists\Components\Section::make('الأقسام المعنية والاعتماديات')
+                ->icon('heroicon-o-link')
+                ->schema([
+                    Infolists\Components\TextEntry::make('departmentLinks')->label('الأقسام المعنية')
+                        ->getStateUsing(fn ($record) => $record->departmentLinks->map(fn ($l) => ($l->department?->name) . ' (' . (\App\Models\TaskDepartment::RESPONSIBILITIES[$l->responsibility] ?? $l->responsibility) . ')')->implode('، ') ?: 'لا يوجد'),
+                    Infolists\Components\TextEntry::make('dependencies')->label('يعتمد على')
+                        ->getStateUsing(fn ($record) => $record->dependencies->pluck('title')->implode('، ') ?: 'لا يوجد'),
+                ])->columns(2),
+
+            Infolists\Components\Section::make('المعوقات والمخاطر')
+                ->icon('heroicon-o-exclamation-triangle')
+                ->schema([
+                    Infolists\Components\TextEntry::make('obstacles')->label('المعوقات')->default('لا توجد'),
+                    Infolists\Components\TextEntry::make('potential_risks')->label('المخاطر المحتملة')->default('لا توجد'),
+                ])->columns(2)->collapsible(),
+
+            Infolists\Components\Section::make('أسباب التأخير')
+                ->icon('heroicon-o-clock')
+                ->visible(fn ($record) => filled($record->delay_reason))
+                ->schema([
+                    Infolists\Components\TextEntry::make('delay_reason')->label('السبب')->columnSpanFull(),
+                    Infolists\Components\IconEntry::make('delay_needs_support')->label('يحتاج دعماً')->boolean(),
+                    Infolists\Components\IconEntry::make('delay_needs_approval')->label('يحتاج موافقة')->boolean(),
+                    Infolists\Components\IconEntry::make('delay_needs_budget')->label('يحتاج ميزانية')->boolean(),
+                    Infolists\Components\IconEntry::make('delay_needs_decision')->label('يحتاج قراراً')->boolean(),
+                ])->columns(2)->collapsible(),
+        ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (Task $record) => Pages\ViewTask::getUrl([$record]))
             ->columns([
                 Tables\Columns\TextColumn::make('title')
                     ->label(__('Title'))
@@ -264,6 +341,7 @@ class TaskResource extends Resource
                     ->relationship('project', 'name'),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -290,6 +368,7 @@ class TaskResource extends Resource
         return [
             'index' => Pages\ListTasks::route('/'),
             'create' => Pages\CreateTask::route('/create'),
+            'view' => Pages\ViewTask::route('/{record}'),
             'edit' => Pages\EditTask::route('/{record}/edit'),
         ];
     }
